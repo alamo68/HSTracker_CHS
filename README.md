@@ -54,6 +54,31 @@ HSTracker CHS 是基于 [HSTracker](https://github.com/HearthSim/HSTracker) 的 
 
 #### 配置 Clash/mihomo
 
+推荐使用 **Clash Verge / Clash Verge Rev**，并且必须开启 **虚拟网卡（TUN）模式**。
+
+需要满足以下条件，否则 HSTracker 可能查不到炉石对局连接：
+
+1. Clash Verge 使用 **虚拟网卡模式 / TUN 模式**，让炉石的流量进入 Clash。
+2. 在 Clash Verge 的 **全局覆写 / 全局扩展配置 / Merge** 中加入：
+
+```yaml
+# 2. 核心控制参数 (直接注入全局主配置)
+find-process-mode: always  # 开启全局进程匹配模式
+```
+
+`find-process-mode: always` 用于让 Clash 在 connections 接口里返回完整的进程路径；HSTracker 需要用它来区分：
+
+- `Hearthstone.app/Contents/MacOS/Hearthstone` 的对局服务器连接；
+- Battle.net 的会话连接。
+
+没有这个参数时，Clash API 可能查不到进程信息，一键拔线会提示：
+
+```text
+未找到炉石对局连接
+```
+
+配置完成后，在 HSTracker 里继续设置 External Controller：
+
 1. 打开 HSTracker 菜单「拔线 → 设置secret…」。
 2. 填写 Clash/mihomo 的 External Controller，例如 `127.0.0.1:9097`。
 3. 填写 Secret（没有就留空）。
@@ -102,10 +127,12 @@ Bob's Buddy 面板会自动显示在游戏窗口顶部，包含：
 
 ### 拔线失败怎么办？
 
-1. 确认 Clash/mihomo 的 External Controller 和 Secret 正确。
-2. 确认炉石流量走了 Clash/mihomo 的 TUN 或系统代理。
-3. 确认已经进入实际对局（主菜单/大厅没有对局服务器连接）。
-4. 用菜单「拔线 → 检测 Clash 连接」检查连通性。
+1. 确认使用 Clash Verge / Clash Verge Rev，并开启了虚拟网卡（TUN）模式。
+2. 确认全局覆写里已加入 `find-process-mode: always`。
+3. 确认 Clash/mihomo 的 External Controller 和 Secret 正确。
+4. 确认炉石流量走了 Clash/mihomo 的 TUN 或系统代理。
+5. 确认已经进入实际对局（主菜单/大厅没有对局服务器连接）。
+6. 用菜单「拔线 → 检测 Clash 连接」检查连通性。
 
 ### macOS 提示应用已损坏或无法验证
 
