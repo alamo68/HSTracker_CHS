@@ -58,7 +58,7 @@
                                                                     <subviews>
                                                                         <textField identifier="avgDamgeGivenTextField" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="91u-wA-Ugf" userLabel="AVG DMG">
                                                                             <rect key="frame" x="-2" y="0.0" width="74" height="16"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="AVG DMG" id="h3H-2c-OkJ" userLabel="AVG DMG">
+                                                                            <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="平均伤害" id="h3H-2c-OkJ" userLabel="AVG DMG">
                                                                                 <font key="font" metaFont="smallSystem"/>
                                                                                 <color key="textColor" red="0.54117647058823526" green="0.77647058823529413" blue="0.43137254901960786" alpha="1" colorSpace="calibratedRGB"/>
                                                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -191,7 +191,7 @@
                                                                                             <subviews>
                                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1DH-KO-z6U">
                                                                                                     <rect key="frame" x="-2" y="0.0" width="54" height="14"/>
-                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Lethal" id="KL3-ZW-CmV">
+                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="出局" id="KL3-ZW-CmV">
                                                                                                         <font key="font" metaFont="smallSystem"/>
                                                                                                         <color key="textColor" red="0.54117647059999996" green="0.77647058820000003" blue="0.43137254899999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -255,7 +255,7 @@
                                                                                             <subviews>
                                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nfX-Ip-dQK">
                                                                                                     <rect key="frame" x="-2" y="0.0" width="54" height="14"/>
-                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Win" id="ap0-Df-S17">
+                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="胜利" id="ap0-Df-S17">
                                                                                                         <font key="font" metaFont="smallSystem"/>
                                                                                                         <color key="textColor" red="0.54117647058823526" green="0.77647058823529413" blue="0.43137254901960786" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -330,7 +330,7 @@
                                                                                             <subviews>
                                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IZE-mK-Kew">
                                                                                                     <rect key="frame" x="-2" y="0.0" width="54" height="14"/>
-                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Tie" id="Ek9-wV-FN6">
+                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="平局" id="Ek9-wV-FN6">
                                                                                                         <font key="font" metaFont="smallSystem"/>
                                                                                                         <color key="textColor" red="1" green="1" blue="1" alpha="0.69999999999999996" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -420,7 +420,7 @@
                                                                                             <subviews>
                                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Jv-Di-7oA" userLabel="Lose">
                                                                                                     <rect key="frame" x="-2" y="0.0" width="54" height="14"/>
-                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Loss" id="am7-wl-m8P" userLabel="Lose">
+                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="失败" id="am7-wl-m8P" userLabel="Lose">
                                                                                                         <font key="font" metaFont="smallSystem"/>
                                                                                                         <color key="textColor" red="0.77647058823529413" green="0.43137254901960786" blue="0.43137254901960786" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -484,7 +484,7 @@
                                                                                             <subviews>
                                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="P75-xG-caG" userLabel="OpponentLethal">
                                                                                                     <rect key="frame" x="-2" y="0.0" width="54" height="14"/>
-                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Lethal" id="e3u-8j-TGc" userLabel="-">
+                                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="出局" id="e3u-8j-TGc" userLabel="-">
                                                                                                         <font key="font" metaFont="smallSystem"/>
                                                                                                         <color key="textColor" red="0.77647058823529413" green="0.43137254901960786" blue="0.43137254901960786" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -704,7 +704,7 @@
                                                                     <subviews>
                                                                         <textField identifier="AVG DMG (taken)" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ye9-De-l0I" userLabel="AVG DMG (taken)">
                                                                             <rect key="frame" x="-2" y="0.0" width="74" height="16"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="AVG DMG" id="EbW-eL-CJE" userLabel="AVG DMG">
+                                                                            <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="平均伤害" id="EbW-eL-CJE" userLabel="AVG DMG">
                                                                                 <font key="font" metaFont="smallSystem"/>
                                                                                 <color key="textColor" red="0.77647058823529413" green="0.43137254901960786" blue="0.43137254901960786" alpha="1" colorSpace="calibratedRGB"/>
                                                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

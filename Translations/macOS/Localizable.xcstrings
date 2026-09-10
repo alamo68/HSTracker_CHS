@@ -2539,6 +2539,12 @@
             "state" : "translated",
             "value" : "Current Combat (1 Player Not Seen)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本场战斗（1名玩家未观测到）"
+          }
         }
       }
     },
@@ -2549,6 +2555,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Final Combat (1 Player Not Seen)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最终战斗（1名玩家未观测到）"
           }
         }
       }
@@ -2561,6 +2573,12 @@
             "state" : "translated",
             "value" : "Previous Combat (1 Player Not Seen)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上场战斗（1名玩家未观测到）"
+          }
         }
       }
     },
@@ -2571,6 +2589,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show Current Combat (1 Player Not Seen)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示本场战斗（1名玩家未观测到）"
           }
         }
       }
@@ -2583,6 +2607,12 @@
             "state" : "translated",
             "value" : "Show Final Combat (1 Player Not Seen)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示最终战斗（1名玩家未观测到）"
+          }
         }
       }
     },
@@ -2593,6 +2623,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show Previous Combat (1 Player Not Seen)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示上场战斗（1名玩家未观测到）"
           }
         }
       }
@@ -2616,6 +2652,12 @@
             "state" : "translated",
             "value" : "Unsupported Interaction"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂不支持的交互"
+          }
         }
       }
     },
@@ -2626,6 +2668,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Waiting For Teammates..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "等待队友…"
           }
         }
       }
@@ -7345,6 +7393,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Final Combat"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最终战斗"
           }
         }
       }
@@ -14898,6 +14952,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show Final Combat"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示最终战斗"
           }
         }
       }
