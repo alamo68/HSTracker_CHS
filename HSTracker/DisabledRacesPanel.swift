@@ -165,21 +165,15 @@ final class DisabledRacesPanelController: NSObject {
     }
 
     @objc private func poll() {
-        // 左上角合并面板与 Bob's Buddy 同显同隐。
-        guard let bobsBuddyWindow = AppDelegate.instance().coreManager?
-                .game.windowManager.bobsBuddyPanel.window,
-              bobsBuddyWindow.isVisible,
-              let gameFrame = hearthstoneWindowFrame() else {
+        guard let gameFrame = hearthstoneWindowFrame() else {
             hideOverlay()
             return
         }
 
         // 只在真正进入对局后显示（主菜单、酒馆大厅、排队阶段都隐藏）。
+        // 不依赖 isBattlegroundsMatch()：对局中启动/重连时游戏类型可能尚未恢复。
         guard let game = AppDelegate.instance().coreManager?.game,
-              game.isBattlegroundsMatch(),
-              game.currentMode == .gameplay,
-              !game.isInMenu,
-              !game.gameEnded else {
+              game.currentMode == .gameplay else {
             hideOverlay()
             return
         }
