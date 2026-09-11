@@ -1,7 +1,7 @@
 # HSTracker CHS
 
-HSTracker CHS 是基于 [HSTracker](https://github.com/HearthSim/HSTracker) 的 macOS 炉石传说增强版本，主要面向酒馆战棋玩家，集成了 Clash/mihomo 一键拔线、禁用随从面板和 Bob's Buddy 中文界面。
-
+HSTracker CHS 是基于 [HSTracker](https://github.com/HearthSim/HSTracker) 的 macOS 炉石传说增强版本，主要面向酒馆战棋玩家，集成了 Clash/mihomo 一键拔线、禁用随从面板和 胜率计算 中文界面。
+拔线功能借鉴了 https://github.com/z2z63/hearthstone_skipper 大佬的思路。
 ## 功能特性
 
 - **一键拔线**
