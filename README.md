@@ -172,3 +172,6 @@ xcodebuild \
 ## License
 
 遵循上游 HSTracker 的许可协议，详见 [LICENSE](LICENSE)。
+
+## 致谢
+本项目接受 LINUX DO 社区佬友监督与反馈：https://linux.do/
