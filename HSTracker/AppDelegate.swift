@@ -40,6 +40,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
     
     var coreManager: CoreManager!
     var triggers: [NSObjectProtocol] = []
+    private var clashSkipper: ClashSkipperController?
+    private var disabledRacesPanel: DisabledRacesPanelController?
     
     lazy var preferences: PreferencesWindowController = {
         // The two sections follow HDT's options menu, which also files the game modes' panes
@@ -211,6 +213,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         logger.info("*** Starting \(Version.buildName) ***")
         
         HSReplayNetHelper.initialize()
+
+        clashSkipper = ClashSkipperController()
+        clashSkipper?.setup()
+        let racesPanel = DisabledRacesPanelController()
+        racesPanel.onSkip = { [weak self] in
+            self?.clashSkipper?.skipNow()
+        }
+        clashSkipper?.onFeedback = { [weak racesPanel] text in
+            racesPanel?.showFeedback(text)
+        }
+        disabledRacesPanel = racesPanel
         
         // check if we have valid settings
         let missing = Settings.missingConfiguration()
@@ -714,6 +727,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
                                                                               comment: ""))
             item?.title = String.localizedString(Settings.windowsLocked ?  "Unlock windows" : "Lock windows",
                                             comment: "")
+
+            clashSkipper?.installDockMenu(dockMenu)
         }
     }
     
@@ -785,6 +800,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
     
     func openPreferences(pane: PreferencePaneIdentifier) {
         preferences.show(preferencePane: pane)
+    }
+
+    func performClashSkip() {
+        clashSkipper?.skipNow()
     }
     
     @IBAction func lockWindows(_ sender: AnyObject) {

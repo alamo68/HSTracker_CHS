@@ -306,6 +306,8 @@
 		439212151DEF5A5E0017AAE5 /* MultiClassGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439212141DEF5A5E0017AAE5 /* MultiClassGroup.swift */; };
 		439BD8C91EBCD40200959F69 /* EnumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BD8C81EBCD40200959F69 /* EnumTests.swift */; };
 		439C7E4C1C7772C000D29859 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439C7E4B1C7772C000D29859 /* AppDelegate.swift */; };
+		AA11C0DE2F0010000000A002 /* ClashSkipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11C0DE2F0010000000A001 /* ClashSkipper.swift */; };
+		BB22C0DE2F0010000000B002 /* DisabledRacesPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22C0DE2F0010000000B001 /* DisabledRacesPanel.swift */; };
 		439C7E851C777CFC00D29859 /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439C7E7D1C777CFC00D29859 /* Deck.swift */; };
 		439C7E891C777CFC00D29859 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439C7E811C777CFC00D29859 /* Card.swift */; };
 		439C7E8D1C777D1C00D29859 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439C7E8C1C777D1C00D29859 /* Database.swift */; };
@@ -2219,6 +2221,8 @@
 		439BD8C81EBCD40200959F69 /* EnumTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnumTests.swift; sourceTree = "<group>"; };
 		439C7E481C7772C000D29859 /* HSTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HSTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		439C7E4B1C7772C000D29859 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = HSTracker/AppDelegate.swift; sourceTree = "<group>"; };
+		AA11C0DE2F0010000000A001 /* ClashSkipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClashSkipper.swift; path = HSTracker/ClashSkipper.swift; sourceTree = "<group>"; };
+		BB22C0DE2F0010000000B001 /* DisabledRacesPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DisabledRacesPanel.swift; path = HSTracker/DisabledRacesPanel.swift; sourceTree = "<group>"; };
 		439C7E571C7772C000D29859 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = HSTracker/Info.plist; sourceTree = "<group>"; };
 		439C7E5C1C7772C100D29859 /* HSTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HSTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		439C7E601C7772C100D29859 /* HSTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSTrackerTests.swift; sourceTree = "<group>"; };
@@ -4157,6 +4161,8 @@
 				F731044E211FF0050082651C /* Translations */,
 				439C7E4A1C7772C000D29859 /* HSTracker */,
 				439C7E4B1C7772C000D29859 /* AppDelegate.swift */,
+				AA11C0DE2F0010000000A001 /* ClashSkipper.swift */,
+				BB22C0DE2F0010000000B001 /* DisabledRacesPanel.swift */,
 				439C7E791C7779D200D29859 /* HSTracker-Bridging-Header.h */,
 				439C7E571C7772C000D29859 /* Info.plist */,
 				43E6632B1DC743C1007AB06E /* Configs */,
@@ -8645,6 +8651,8 @@
 				B852D8332DDFB92C00884B26 /* CrushclawEnforcer.swift in Sources */,
 				B89343382CD00858009A8727 /* ChaoticTendrilCounter.swift in Sources */,
 				439C7E4C1C7772C000D29859 /* AppDelegate.swift in Sources */,
+				AA11C0DE2F0010000000A002 /* ClashSkipper.swift in Sources */,
+				BB22C0DE2F0010000000B002 /* DisabledRacesPanel.swift in Sources */,
 				B846CCB82E1C5C9100552F9C /* Hybridization.swift in Sources */,
 				B852D82B2DDFB7DA00884B26 /* HighAbbessAlura.swift in Sources */,
 				B86D8A282D9600E400AB65A5 /* SuccumbToMadness.swift in Sources */,
