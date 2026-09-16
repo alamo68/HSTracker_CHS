@@ -7,10 +7,46 @@ import CoreGraphics
 private let disabledRacesHearthstoneBundleIdentifier = "unity.Blizzard Entertainment.Hearthstone"
 
 private final class TopLeftMergedView: NSView {
-    static let panelHeight: CGFloat = 26
-    static let horizontalPadding: CGFloat = 8
-    static let buttonGap: CGFloat = 8
-    static let buttonWidth: CGFloat = 78
+    // 与 Bob's Buddy 面板底部的状态栏同高、同风格（BobsBuddyPanelView.statusBar）：
+    // 文案最小高度 20 + 上下各 5 的内边距 = 30，背景 #141617、圆角 3、
+    // 字号 14、白色文字——只有“一键拔线”用绿色。
+    // Bob's Buddy 画在 RootOverlayView 的 1080 参考画布上按窗口高度等比缩放，
+    // 这里沿用同一套换算，所以任何窗口尺寸下两者高度都一致。
+    static let referenceHeight: CGFloat = 30
+    static let referenceCanvasHeight: CGFloat = 1080
+
+    private static let referenceHorizontalPadding: CGFloat = 5
+    private static let referenceButtonGap: CGFloat = 8
+    private static let referenceButtonMinWidth: CGFloat = 78
+    private static let referenceButtonHeight: CGFloat = 20
+    private static let referenceCornerRadius: CGFloat = 3
+    private static let referenceFontSize: CGFloat = 14
+
+    /// RootOverlayView 使用的缩放比，参考高度 1080。
+    static func scale(hearthstoneHeight: CGFloat) -> CGFloat {
+        guard hearthstoneHeight > 0 else { return 1 }
+        return hearthstoneHeight / referenceCanvasHeight
+    }
+
+    /// 面板高度直接取 Bob's Buddy 状态栏在当前缩放下的高度。
+    static func height(hearthstoneHeight: CGFloat) -> CGFloat {
+        max((referenceHeight * scale(hearthstoneHeight: hearthstoneHeight)).rounded(), 1)
+    }
+
+    /// 视图按自身高度反推缩放比，保证内容与面板一起缩放。
+    private var scale: CGFloat {
+        max(bounds.height / Self.referenceHeight, 0.1)
+    }
+
+    // 状态栏的文案是 .font(.system(size: 14))，两段文字用同一套字体，
+    // 区别只在颜色（见 draw）。
+    private static func buttonFont(scale: CGFloat) -> NSFont {
+        NSFont.systemFont(ofSize: referenceFontSize * scale)
+    }
+
+    private static func raceFont(scale: CGFloat) -> NSFont {
+        NSFont.systemFont(ofSize: referenceFontSize * scale)
+    }
 
     var races: [Race] = [] {
         didSet {
@@ -26,16 +62,16 @@ private final class TopLeftMergedView: NSView {
 
     private var buttonRect = NSRect.zero
 
-    private static let buttonFont = NSFont.systemFont(ofSize: 12, weight: .semibold)
-    private static let raceFont = NSFont.systemFont(ofSize: 12, weight: .medium)
-
-    static func preferredWidth(races: [Race], buttonTitle: String) -> CGFloat {
+    static func preferredWidth(races: [Race], buttonTitle: String, scale: CGFloat) -> CGFloat {
         let text = Self.disabledText(races: races)
-        let textWidth = (text as NSString).size(withAttributes: [.font: raceFont]).width
-        let buttonTextWidth = (buttonTitle as NSString).size(withAttributes: [.font: buttonFont]).width
-        let resolvedButtonWidth = max(Self.buttonWidth, buttonTextWidth + 14)
-        let raw = horizontalPadding * 2 + resolvedButtonWidth + buttonGap + textWidth
-        return min(max(raw, 190), 560)
+        let textWidth = (text as NSString)
+            .size(withAttributes: [.font: Self.raceFont(scale: scale)]).width
+        let buttonTextWidth = (buttonTitle as NSString)
+            .size(withAttributes: [.font: Self.buttonFont(scale: scale)]).width
+        let resolvedButtonWidth = max(Self.referenceButtonMinWidth * scale, buttonTextWidth + 14 * scale)
+        let raw = (Self.referenceHorizontalPadding * 2 + Self.referenceButtonGap) * scale
+            + resolvedButtonWidth + textWidth
+        return min(max(raw, 190 * scale), 560 * scale)
     }
 
     private static func disabledText(races: [Race]) -> String {
@@ -49,18 +85,26 @@ private final class TopLeftMergedView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        let radius: CGFloat = 6
+        let scale = self.scale
+        let padding = Self.referenceHorizontalPadding * scale
+        let gap = Self.referenceButtonGap * scale
+        let radius = Self.referenceCornerRadius * scale
+
         NSColor(calibratedRed: 0.078, green: 0.086, blue: 0.090, alpha: 0.94).setFill()
         NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius).fill()
 
+        let buttonFont = Self.buttonFont(scale: scale)
+        let raceFont = Self.raceFont(scale: scale)
+
+        let buttonHeight = Self.referenceButtonHeight * scale
         let buttonTextWidth = (buttonTitle as NSString)
-            .size(withAttributes: [.font: Self.buttonFont]).width
-        let buttonWidth = max(Self.buttonWidth, buttonTextWidth + 14)
+            .size(withAttributes: [.font: buttonFont]).width
+        let buttonWidth = max(Self.referenceButtonMinWidth * scale, buttonTextWidth + 14 * scale)
         buttonRect = NSRect(
-            x: Self.horizontalPadding,
-            y: (bounds.height - 18) / 2,
+            x: padding,
+            y: (bounds.height - buttonHeight) / 2,
             width: buttonWidth,
-            height: 18
+            height: buttonHeight
         )
 
         let buttonParagraph = NSMutableParagraphStyle()
@@ -68,7 +112,7 @@ private final class TopLeftMergedView: NSView {
         let buttonAttributed = NSAttributedString(
             string: buttonTitle,
             attributes: [
-                .font: Self.buttonFont,
+                .font: buttonFont,
                 .foregroundColor: NSColor(calibratedRed: 0.20, green: 0.90, blue: 0.25, alpha: 1),
                 .paragraphStyle: buttonParagraph,
             ]
@@ -86,15 +130,15 @@ private final class TopLeftMergedView: NSView {
         let textAttributed = NSAttributedString(
             string: text,
             attributes: [
-                .font: Self.raceFont,
+                .font: raceFont,
                 .foregroundColor: NSColor.white,
                 .paragraphStyle: textParagraph,
             ]
         )
         let textRect = NSRect(
-            x: buttonRect.maxX + Self.buttonGap,
+            x: buttonRect.maxX + gap,
             y: bounds.midY - textAttributed.size().height / 2,
-            width: max(0, bounds.maxX - Self.horizontalPadding - buttonRect.maxX - Self.buttonGap),
+            width: max(0, bounds.maxX - padding - buttonRect.maxX - gap),
             height: textAttributed.size().height
         )
         textAttributed.draw(in: textRect)
@@ -112,7 +156,7 @@ final class DisabledRacesPanelController: NSObject {
     var onSkip: (() -> Void)?
 
     private let overlay = NSPanel(
-        contentRect: NSRect(x: 0, y: 0, width: 260, height: TopLeftMergedView.panelHeight),
+        contentRect: NSRect(x: 0, y: 0, width: 260, height: TopLeftMergedView.referenceHeight),
         styleMask: [.borderless, .nonactivatingPanel],
         backing: .buffered,
         defer: false
@@ -187,18 +231,25 @@ final class DisabledRacesPanelController: NSObject {
                 < String.localizedString($1.rawValue, comment: "tribe")
         }
         contentView.races = races
-        logState("shown: frame=\(gameFrame) races=\(races.map { $0.rawValue })")
 
+        // 与 Bob's Buddy 状态栏同高：用 RootOverlayView 的 1080 参考做等比换算，
+        // 并把内边距、字号一起按同一比例缩放。
+        let scale = TopLeftMergedView.scale(hearthstoneHeight: gameFrame.height)
         let width = TopLeftMergedView.preferredWidth(
             races: races,
-            buttonTitle: contentView.buttonTitle
+            buttonTitle: contentView.buttonTitle,
+            scale: scale
         )
-        let height = TopLeftMergedView.panelHeight
-        let margin: CGFloat = 8
+        let height = TopLeftMergedView.height(hearthstoneHeight: gameFrame.height)
+        // 吸顶：贴到炉石窗口真正的上边缘，只保留左右留白。
+        let top = hearthstoneWindowTop(gameFrame: gameFrame)
+        logState("shown: frame=\(gameFrame) top=\(top) height=\(height) "
+            + "screens=\(NSScreen.screens.map { $0.frame }) races=\(races.map { $0.rawValue })")
+        let horizontalMargin = 8 * scale
         overlay.setFrame(
             NSRect(
-                x: gameFrame.minX + margin,
-                y: gameFrame.maxY - height - margin,
+                x: gameFrame.minX + horizontalMargin,
+                y: top - height,
                 width: width,
                 height: height
             ),
@@ -214,6 +265,23 @@ final class DisabledRacesPanelController: NSObject {
         guard lastStateLog != state else { return }
         lastStateLog = state
         logger.info("[DisabledRacesPanel] \(state)")
+    }
+
+    /// 炉石窗口真正的上边缘。
+    ///
+    /// SizeHelper 暴露的 `frame` 在非全屏时会减掉标题栏高度（Hearthstone 窗口化时
+    /// 有标题栏），直接拿它当“天花板”会让面板停在标题栏下方约 28pt 的位置，看起来
+    /// 没有吸顶。`_frame` 是未裁剪的整窗矩形，全屏时两者本来就相等。
+    private func hearthstoneWindowTop(gameFrame: NSRect) -> CGFloat {
+        let windowFrame = SizeHelper.hearthstoneWindow._frame
+        if windowFrame.maxY > 0 && windowFrame.height > 0 {
+            return windowFrame.maxY
+        }
+        // 回退：内容区顶部 + 被减掉的标题栏。
+        let titlebar = SizeHelper.hearthstoneWindow.isFullscreen()
+            ? 0
+            : SizeHelper.HearthstoneWindow.titlebarHeight
+        return gameFrame.maxY + titlebar
     }
 
     /// 优先使用 HSTracker 自身用于定位所有覆盖层的窗口矩形，
