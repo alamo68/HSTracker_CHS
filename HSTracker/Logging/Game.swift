@@ -681,7 +681,11 @@ class Game: NSObject, PowerEventHandler {
             // The game type outlives the match, and the two signals for leaving it (the scene and the
             // log) do not arrive in a fixed order, so the match is over as soon as either one says so.
             // A scene we cannot read is not one of them, or a stalled watcher would keep the panel down.
-            let leftViaScene = SceneHandler.scene != nil && SceneHandler.scene != .gameplay
+            // 拔线重连时 SceneHandler 可能短暂停留在 bacon，但实际仍在同一局；
+            // 只有已经回到菜单（isInMenu）时才按 scene 判定为离开对局。
+            let leftViaScene = SceneHandler.scene != nil
+                && SceneHandler.scene != .gameplay
+                && self.isInMenu
             let isBG = self.isBattlegroundsMatch() && !self.isInMenu && !leftViaScene && !self.gameEnded
             let show = isBG && Settings.showBobsBuddy &&
                 ((Settings.hideAllWhenGameInBackground && self.hearthstoneRunState.isActive)
@@ -1723,7 +1727,6 @@ class Game: NSObject, PowerEventHandler {
         _availableRaces = nil
         _unavailableRaces = nil
         _brawlInfo = nil
-        _battlegroundsBoardState?.reset()
         _battlegroundsDeityState?.reset()
         _battlegroundsHeroPickStatsParams = nil
         _battlegroundsHeroPickState = nil
@@ -2083,6 +2086,52 @@ class Game: NSObject, PowerEventHandler {
             if self.gameEntity == nil || self.currentMode != .gameplay {
                 return
             }
+
+            // 对局中启动/重连时不会走 gameStart(at:)，这里补回对局状态，
+            // 否则 isInMenu/gameEnded 会保持默认值，Bob's Buddy 等窗口会被隐藏。
+            self.gameEnded = false
+            self.isInMenu = false
+            self.handledGameEnd = false
+
+            // 拔线后 LoadingScreenHandler 的 Gameplay.Start 会触发 Game.reset()，
+            // 把从 HearthMirror 缓存的 game type / player id 全部清掉。此时下面的
+            // isBattlegroundsMatch() 会一直返回 false，Bob's Buddy 也不会再启动，
+            // 因此必须先重新从 Mirror 同步对局类型与玩家信息。
+            _ = self.matchInfo
+            self.cacheSpectator()
+            if self.currentGameType == .gt_unknown {
+                for _ in 0 ..< 5 where self.currentGameType == .gt_unknown {
+                    self.cacheGameType()
+                    Thread.sleep(forTimeInterval: 1)
+                }
+            }
+
+            // 在拔线中途重启/重连时，HearthMirror 经常拿不到完整的 MatchInfo，
+            // 玩家 ID 会一直是 -1，导致 Bob's Buddy 快照失败。除了继续等 Mirror
+            // 返回，还从日志里的 PlayerID=xx, PlayerName=xxx 行反向恢复：
+            // 本机账号的 battleTag 匹配本地玩家 ID，另一个 ID 就是对手。
+            if self.player.id < 0 || self.opponent.id < 0 {
+                self._matchInfoCacheInvalid = true
+                self.cacheMatchInfo()
+            }
+            let battleTag = MirrorHelper.getBattleTag()
+            for _ in 0 ..< 24 where self.player.id < 0 || self.opponent.id < 0 {
+                if let battleTag {
+                    if self.player.id < 0, let playerId = self.playerIdsByPlayerName[battleTag] {
+                        self.player.id = playerId
+                    }
+                    let others = self.playerIdsByPlayerName.filter { _, value in value != self.player.id }
+                    if self.opponent.id < 0, let other = others.first {
+                        self.opponent.id = other.value
+                    }
+                }
+                if self.player.id < 0 || self.opponent.id < 0 {
+                    Thread.sleep(forTimeInterval: 0.5)
+                }
+            }
+            logger.info("Reconnect sync: gameType=\(self.currentGameType) "
+                + "isBG=\(self.isBattlegroundsMatch()) "
+                + "playerId=\(self.player.id) opponentId=\(self.opponent.id)")
             
             if self.isTraditionalHearthstoneMatch {
                 CardLegalityChecker.loadCardsByFormat(gameType: self.currentGameType, format: self.currentFormatType)
@@ -2109,6 +2158,11 @@ class Game: NSObject, PowerEventHandler {
                     await self?.arenaPackagesManager.updatePackages()
                 }
             }
+            // 拔线/对局服务器重连时，Game.reset() 会先隐藏全部追踪窗口。
+            // 无论模式，这里都在重连完成后强制把所有窗口状态重刷一遍，
+            // 避免窗口一直消失或错误地停留在某个模式。
+            self.updateAllTrackers()
+            self.updateTrackers(reset: false)
         }
     }
 
@@ -2127,6 +2181,9 @@ class Game: NSObject, PowerEventHandler {
         AppHealth.instance.setHearthstoneGameRunning(flag: false)
 		
         handleEndGame()
+        // 拔线重连时 Game.reset() 不再清空对手棋盘快照（否则当次回合重连后
+        // 对手棋盘会变成空）。真正的对局结束时才在这里清掉，避免带到下一局。
+        _battlegroundsBoardState?.reset()
         self.powerLog = []
         AppDelegate.instance().coreManager?.handleGameEnd()
 
@@ -2149,6 +2206,7 @@ class Game: NSObject, PowerEventHandler {
         turnTimer.stop()
 
         isInMenu = true
+        _battlegroundsBoardState?.reset()
         
         DispatchQueue.main.async {
             self.updateMulliganGuidePreLobby()
