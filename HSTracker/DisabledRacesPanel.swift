@@ -120,6 +120,7 @@ final class DisabledRacesPanelController: NSObject {
     private let contentView = TopLeftMergedView()
     private var timer: Timer?
     private var resetFeedbackTask: DispatchWorkItem?
+    private var lastStateLog: String?
 
     override init() {
         super.init()
@@ -166,14 +167,17 @@ final class DisabledRacesPanelController: NSObject {
 
     @objc private func poll() {
         guard let gameFrame = hearthstoneWindowFrame() else {
+            logState("hidden: hearthstone window not found")
             hideOverlay()
             return
         }
 
         // 只在真正进入对局后显示（主菜单、酒馆大厅、排队阶段都隐藏）。
         // 不依赖 isBattlegroundsMatch()：对局中启动/重连时游戏类型可能尚未恢复。
+        let mode = AppDelegate.instance().coreManager?.game.currentMode
         guard let game = AppDelegate.instance().coreManager?.game,
               game.currentMode == .gameplay else {
+            logState("hidden: mode=\(mode?.rawValue ?? "nil")")
             hideOverlay()
             return
         }
@@ -183,6 +187,7 @@ final class DisabledRacesPanelController: NSObject {
                 < String.localizedString($1.rawValue, comment: "tribe")
         }
         contentView.races = races
+        logState("shown: frame=\(gameFrame) races=\(races.map { $0.rawValue })")
 
         let width = TopLeftMergedView.preferredWidth(
             races: races,
@@ -204,7 +209,25 @@ final class DisabledRacesPanelController: NSObject {
         }
     }
 
+    /// 只在状态发生变化时写日志，避免 0.3s 轮询刷屏。
+    private func logState(_ state: String) {
+        guard lastStateLog != state else { return }
+        lastStateLog = state
+        logger.info("[DisabledRacesPanel] \(state)")
+    }
+
+    /// 优先使用 HSTracker 自身用于定位所有覆盖层的窗口矩形，
+    /// 与 Bob's Buddy / 右侧面板同源，保证位置完全一致。
+    /// 该值不可用时（例如尚未 reload）再回退到直接查询窗口服务器。
     private func hearthstoneWindowFrame() -> NSRect? {
+        let helperFrame = SizeHelper.hearthstoneWindow.frame
+        if helperFrame.width > 200 && helperFrame.height > 200 {
+            return helperFrame
+        }
+        return detectedHearthstoneWindowFrame()
+    }
+
+    private func detectedHearthstoneWindowFrame() -> NSRect? {
         guard let pid = NSRunningApplication
             .runningApplications(withBundleIdentifier: disabledRacesHearthstoneBundleIdentifier)
             .first?.processIdentifier else {
