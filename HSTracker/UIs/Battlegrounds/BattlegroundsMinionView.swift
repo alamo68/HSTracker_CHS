@@ -65,6 +65,10 @@ class BattlegroundsMinionView: NSView {
     var display: BattlegroundsMinionDisplay?
     var sourceCardImage: NSImage?
     @IBInspectable var myIntrinsicSize: CGSize = CGSize(width: 100.0, height: 110.0)
+
+    // 属性数值的字号，以及数值太长时的下限（见 drawText）。
+    private static let statFontSize: CGFloat = 45
+    private static let statFontMinSize: CGFloat = 16
     
     override var intrinsicContentSize: NSSize {
         return myIntrinsicSize
@@ -191,19 +195,35 @@ class BattlegroundsMinionView: NSView {
     }
     
     func drawText(text: String, rect: NSRect, color: NSColor) {
-        if let font = NSFont(name: "ChunkFive", size: 45) {
-            var attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: color,
-                .strokeWidth: -2,
-                .strokeColor: NSColor.black
-            ]
-            let paragraph = NSMutableParagraphStyle()
-            paragraph.alignment = .center
-            attributes[.paragraphStyle] = paragraph
+        // 45pt 的 ChunkFive 在 90pt 宽的属性框里只放得下三位数：实测 "139" 是
+        // 73pt，而 "1814" 已经 96pt，会被截断/溢出。酒馆打到后期数值动辄上千，
+        // 攻击力和血量就会被画成看起来像几个回合前的旧数值，所以这里按实际宽度
+        // 把字号缩到能放进框里为止。
+        guard var font = NSFont(name: "ChunkFive", size: Self.statFontSize) else { return }
 
-            text.draw(with: rect, options: NSString.DrawingOptions.truncatesLastVisibleLine,
-                                        attributes: attributes)
+        let available = rect.width - 6
+        let naturalWidth = (text as NSString).size(withAttributes: [.font: font]).width
+        var drawRect = rect
+        if naturalWidth > available && naturalWidth > 0 {
+            let fitted = max(Self.statFontSize * available / naturalWidth, Self.statFontMinSize)
+            font = NSFont(name: "ChunkFive", size: fitted) ?? font
+            // 缩字号后按高度重新居中，数值不会跑偏。
+            let height = (text as NSString).size(withAttributes: [.font: font]).height
+            drawRect.origin.y = rect.midY - height / 2
+            drawRect.size.height = height
         }
+
+        var attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: color,
+            .strokeWidth: -2,
+            .strokeColor: NSColor.black
+        ]
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        attributes[.paragraphStyle] = paragraph
+
+        text.draw(with: drawRect, options: NSString.DrawingOptions.truncatesLastVisibleLine,
+                                    attributes: attributes)
     }
 }
