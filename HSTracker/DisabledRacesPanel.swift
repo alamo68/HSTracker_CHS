@@ -210,6 +210,15 @@ final class DisabledRacesPanelController: NSObject {
     }
 
     @objc private func poll() {
+        // 炉石退出后不会再有日志，currentMode 会停在 gameplay；SizeHelper 的窗口矩形
+        // 又是缓存值（只在追踪时 reload），退出后同样不更新。只靠这两者判断，面板会
+        // 一直留在左上角，所以这里先实时确认炉石还在运行。
+        guard isHearthstoneRunning else {
+            logState("hidden: hearthstone not running")
+            hideOverlay()
+            return
+        }
+
         guard let gameFrame = hearthstoneWindowFrame() else {
             logState("hidden: hearthstone window not found")
             hideOverlay()
@@ -265,6 +274,17 @@ final class DisabledRacesPanelController: NSObject {
         guard lastStateLog != state else { return }
         lastStateLog = state
         logger.info("[DisabledRacesPanel] \(state)")
+    }
+
+    /// 炉石客户端进程是否还在。
+    ///
+    /// 这里刻意只用实时查询，不叠加 `game.isRunning`：后者由 NSWorkspace 通知维护，
+    /// 本身也可能过期（漏通知时会一直为 false，反而把面板在对局中藏起来），而客户端
+    /// 进程是否存在正是面板该不该显示的直接判据。
+    private var isHearthstoneRunning: Bool {
+        !NSRunningApplication
+            .runningApplications(withBundleIdentifier: disabledRacesHearthstoneBundleIdentifier)
+            .isEmpty
     }
 
     /// 炉石窗口真正的上边缘。
