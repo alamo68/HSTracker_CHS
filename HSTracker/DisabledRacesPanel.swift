@@ -219,6 +219,14 @@ final class DisabledRacesPanelController: NSObject {
             return
         }
 
+        // 游戏切到后台时收起面板：别的覆盖层都画在 HSTracker 自己的覆盖窗口里，被其它
+        // App 盖住自然就看不见了，只有这个面板是 floating 窗口，不主动隐藏会一直浮在最上面。
+        guard isHearthstoneOrSelfFrontmost else {
+            logState("hidden: hearthstone in background")
+            hideOverlay()
+            return
+        }
+
         guard let gameFrame = hearthstoneWindowFrame() else {
             logState("hidden: hearthstone window not found")
             hideOverlay()
@@ -285,6 +293,19 @@ final class DisabledRacesPanelController: NSObject {
         !NSRunningApplication
             .runningApplications(withBundleIdentifier: disabledRacesHearthstoneBundleIdentifier)
             .isEmpty
+    }
+
+    /// 前台是炉石，或前台是 HSTracker 自己。
+    ///
+    /// 把 HSTracker 自己也算作"可以显示"是有意的：之前反馈过点开 HSTracker 界面时
+    /// 面板不该消失，所以只有切到第三方 App 才收起。查不到前台应用时按可显示处理，
+    /// 宁可多显示也不要误藏。
+    private var isHearthstoneOrSelfFrontmost: Bool {
+        guard let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier else {
+            return true
+        }
+        return frontmost == disabledRacesHearthstoneBundleIdentifier
+            || frontmost == Bundle.main.bundleIdentifier
     }
 
     /// 炉石窗口真正的上边缘。
