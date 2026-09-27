@@ -10,8 +10,8 @@
 
 | 项目 | 值 |
 |---|---|
-| 官方基线 | `3.6.12`（upstream tag） |
-| 本地分支 | `sync-3.6.12`，HEAD `b5d21245` |
+| 官方基线 | `3.6.13`（upstream tag） |
+| 本地分支 | `sync-3.6.13`，HEAD `03809cf3` |
 | 远端 | `origin` = `alamo68/HSTracker_CHS`（发布用）、`upstream` = `HearthSim/HSTracker` |
 | 与官方的差异 | 12 个文件（含本文件），见下方清单 |
 
@@ -117,17 +117,19 @@ $GIT tag | grep -E '^3\.6\.' | sort -V | tail -3
 # 2. 以官方新 tag 为基线开分支
 $GIT checkout -b sync-<新版本> <新tag>
 
-# 3. 依序把本仓库的提交带过来（顺序也有关系：feature 在前，修复在后）
-$GIT cherry-pick -x 9a1af180   # A+B：面板与拔线
-$GIT cherry-pick -x 59fa496d   # C：重连修复  ← 预计在这里冲突，见上文
-$GIT cherry-pick -x c89928ba   # A：面板尺寸/吸顶
-$GIT cherry-pick -x 662c726f   # E：四位数不截断
-$GIT cherry-pick -x 8d4d5402   # D：畸变怪中文名
-$GIT cherry-pick -x 4de43e9f   # A：退出炉石后隐藏
-$GIT cherry-pick -x 75006de4   # A：后台隐藏
-$GIT cherry-pick -x ccbfd158   # A：越过菜单栏吸顶
-$GIT cherry-pick -x abf97afc   # A：高度对齐（已被下一条覆盖，可跳过）
-$GIT cherry-pick -x b5d21245   # A：30pt、上下不留白
+# 3. 把上一版 CHS 分支的提交按原顺序带过来（feature 在前，修复在后）。
+#    每次同步都会重写这些提交，所以 SHA 每版都不一样 —— 用命令列出来，
+#    别照抄文档/聊天里的旧 SHA（照抄 3.6.12 那次的 SHA 会把文档里已修正的
+#    数字又带回来一次，这次就踩到了）。
+$GIT log --oneline --reverse <上一版基线tag> <上一版CHS分支>
+# 例如本次：
+#   $GIT log --oneline --reverse 3.6.12 master
+# 然后逐个带过来：
+$GIT cherry-pick -x <sha>      # 顺序照上面列出的来
+# 各提交大致对应：
+#   面板与拔线（A+B）→ 重连修复（C，冲突点见上文）→ 面板尺寸/吸顶 →
+#   四位数不截断（E）→ 畸变怪中文名（D）→ 退出后隐藏 → 后台隐藏 →
+#   越过菜单栏吸顶 → 高度 30 且上下不留白
 
 # 4. 核对差异：应当只有改动清单里那些文件，且没有任何删除
 $GIT diff --stat <新tag> HEAD
@@ -158,6 +160,13 @@ ditto -c -k --keepParent <HSTracker.app> HSTracker-CHS-<版本>-macos-universal.
 
 - `CLANG_MODULE_CACHE_PATH` 必不可少：`Compile CardDefs` 阶段要现场编译 `CardDefsCompiler`，默认的 clang 模块缓存目录在受保护路径下会报 `Operation not permitted`。
 - 构建脚本会联网下载依赖：`libs.hearthsim.net`（HearthMirror、BobsBuddy、HearthDb）和 GitHub 的 `HearthSim/hsdata`（CardDefs.xml 等三份）。**CardDefs 的下载脚本用 `curl -z` 按时间戳判断，换版本时一定要先删掉本地缓存的那三份 xml**，否则会继续沿用旧版本的卡牌数据。
+- **HearthMirror 的新版本 CDN 常常还没发布**：脚本按 `HSTracker/HearthMirror-version.txt` 的 sha 去 `libs.hearthsim.net/hstracker/<sha>/HearthMirror.framework.zip` 下载，官方刚发版时这个 zip 往往是 404（3.6.13 就是），而**官方 release 的应用包里那份 framework 被剥掉了 Headers/Modules，编译用不了**（会报 `Unable to resolve module dependency: 'HearthMirror'`）。处理办法：
+  1. 从官方 release 的 `HSTracker.app.zip` 取出 `Contents/Frameworks/HearthMirror.framework`；
+  2. 再从 CDN 下载**上一个 sha** 的 zip，得到带 `Headers/Modules` 的骨架，把新二进制覆盖到 `Versions/A/HearthMirror`（连带 `Resources`）；
+  3. 用 `otool -ov <二进制>` 读新版本里缺的类/方法的编码（属性编码 `q` = `NSInteger`/`int64_t`、`c` = `BOOL`、`@"NSArray"` = 数组；方法 `@16@0:8` = 无参返回对象），照旧头文件的风格补进 `Headers/HearthMirror_imp.h`；
+  4. 把 sha 写进 `downloaded-frameworks/HearthMirror/HearthMirror.sha1`，脚本就会跳过下载。
+
+  3.6.13 这次缺的是 `MirrorBattlegroundsMinionPool` / `MirrorBattlegroundsMinionPoolEntry`（属性 `dbfId`、`tier`、`cardType` 是 `NSInteger`，`minionTypes` 是 `NSArray<NSNumber *>`，`banned` 是 `BOOL`）和 `HearthMirror.getBattlegroundsMinionPool`。`downloaded-frameworks/` 已被 gitignore，所以这些只存在本机；等 CDN 补上对应 zip 就能去掉手工声明。
 - `/Applications` 受 macOS「App 管理」保护，`mv`/`rm` 会被拒；`ditto` 是**合并覆盖**，会把上一版残留的文件留下，导致签名失效。做法：`ditto` 覆盖 → 用 `find` 对比两份文件清单移走多余文件 → 重新签名。`~/Applications` 下的副本不受限制。
 
 ## 发布
