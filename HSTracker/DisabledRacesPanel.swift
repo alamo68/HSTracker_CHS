@@ -7,17 +7,16 @@ import CoreGraphics
 private let disabledRacesHearthstoneBundleIdentifier = "unity.Blizzard Entertainment.Hearthstone"
 
 private final class TopLeftMergedView: NSView {
-    // 高度直接取 Bob's Buddy 里那一行"胜率"的高度（BobsBuddyPanelView.expandedHeight，
-    // 胜利/平局/失败那一行，和两侧「平均伤害」小格用的是同一个常量），算法也是它那一套：
-    // 面板画在 RootOverlayView 的 1080 参考画布上，按窗口高度等比缩放。
-    // 直接引用常量而不是抄一个数字，上游调整时这里会跟着走。
-    static let referenceHeight: CGFloat = BobsBuddyPanelView.expandedHeight
+    // 行高 30，与 Bob's Buddy 底部状态栏同高；字号沿用状态栏的 14。
+    // 缩放算法和 Bob's Buddy 一样：画在 RootOverlayView 的 1080 参考画布上按窗口高度等比缩放。
+    static let referenceHeight: CGFloat = 30
     static let referenceCanvasHeight: CGFloat = 1080
 
     private static let referenceHorizontalPadding: CGFloat = 5
     private static let referenceButtonGap: CGFloat = 8
     private static let referenceButtonMinWidth: CGFloat = 78
-    private static let referenceButtonHeight: CGFloat = 20
+    // 上下不留白：按钮撑满整行，文字在行内垂直居中（顺带整行都可点击）。
+    private static let referenceButtonHeight: CGFloat = referenceHeight
     private static let referenceCornerRadius: CGFloat = 3
     private static let referenceFontSize: CGFloat = 14
 
@@ -27,7 +26,7 @@ private final class TopLeftMergedView: NSView {
         return hearthstoneHeight / referenceCanvasHeight
     }
 
-    /// 面板高度 = Bob's Buddy 那一行在当前缩放下的高度。
+    /// 面板高度 = 行高 30 在当前缩放下的高度。
     static func height(hearthstoneHeight: CGFloat) -> CGFloat {
         max((referenceHeight * scale(hearthstoneHeight: hearthstoneHeight)).rounded(), 1)
     }
@@ -264,8 +263,8 @@ final class DisabledRacesPanelController: NSObject {
         }
         contentView.races = races
 
-        // 与 Bob's Buddy 那一行胜率同高：用 RootOverlayView 的 1080 参考做等比换算，
-        // 并把内边距、字号一起按同一比例缩放。缩放比显式写给视图，字号不再跟面板高度走。
+        // 高度 30、字号 14，与 Bob's Buddy 状态栏一致，缩放走 RootOverlayView 的 1080
+        // 参考换算。缩放比显式写给视图，字号不跟面板高度走。
         let scale = TopLeftMergedView.scale(hearthstoneHeight: gameFrame.height)
         contentView.scale = scale
         let width = TopLeftMergedView.preferredWidth(
