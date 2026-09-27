@@ -307,8 +307,10 @@ final class DisabledRacesPanelController: NSObject {
     /// 也就是"卡牌数据里出现过的所有种族"，属于历史全集——纳加已经不在酒馆轮换里了，
     /// 它的卡却还留在数据中，于是被误报成"禁用"。
     ///
-    /// `BattlegroundsDb` 的 `races` 由 meta period 决定（它自己的注释写着"卡牌数据可能
-    /// 带着不在轮换里的种族，所以由 meta period 决定有哪些"），正是"当前有哪些种族"。
+    /// 全集改用 `BattlegroundsDbSingleton.instance.races`，和上游的随从浏览器
+    /// （BattlegroundsMinionsViewModel 里的 `availableRaces ?? Array(...instance.races)`，
+    /// 见上游提交 7ab65cb8）取的是同一个来源。它的注释写得很清楚：
+    /// "卡牌数据可能带着不在轮换里的种族，所以由 meta period 决定有哪些"。
     /// 远程配置还没到时会回退到旧的算法。
     private func disabledRaces(of game: Game) -> [Race] {
         let available = game.availableRaces ?? []
@@ -316,7 +318,7 @@ final class DisabledRacesPanelController: NSObject {
             return []
         }
 
-        let rotation = BattlegroundsDbSingleton.current.races.filter { $0 != .invalid && $0 != .all }
+        let rotation = BattlegroundsDbSingleton.instance.races.filter { $0 != .invalid && $0 != .all }
         guard !rotation.isEmpty else {
             return game.unavailableRaces ?? []
         }
