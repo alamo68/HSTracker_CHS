@@ -155,7 +155,18 @@ private final class TopLeftMergedView: NSView {
 final class DisabledRacesPanelController: NSObject {
     var onSkip: (() -> Void)?
 
-    private let overlay = NSPanel(
+    /// 面板窗口。
+    ///
+    /// 默认的 `constrainFrameRect(_:to:)` 会把窗口压到菜单栏下方（屏幕的 visibleFrame
+    /// 里），于是即便调用方请求的是"上沿贴屏幕顶端"，实际落点也会低一条菜单栏的高度，
+    /// 看起来就是没吸顶。这块面板只落在炉石窗口范围内，原样返回请求矩形即可。
+    private final class TopLeftPanel: NSPanel {
+        override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+            return frameRect
+        }
+    }
+
+    private let overlay = TopLeftPanel(
         contentRect: NSRect(x: 0, y: 0, width: 260, height: TopLeftMergedView.referenceHeight),
         styleMask: [.borderless, .nonactivatingPanel],
         backing: .buffered,
@@ -260,8 +271,6 @@ final class DisabledRacesPanelController: NSObject {
         let height = TopLeftMergedView.height(hearthstoneHeight: gameFrame.height)
         // 吸顶：贴到炉石窗口真正的上边缘，只保留左右留白。
         let top = hearthstoneWindowTop(gameFrame: gameFrame)
-        logState("shown: frame=\(gameFrame) top=\(top) height=\(height) "
-            + "screens=\(NSScreen.screens.map { $0.frame }) races=\(races.map { $0.rawValue })")
         let horizontalMargin = 8 * scale
         overlay.setFrame(
             NSRect(
@@ -272,6 +281,10 @@ final class DisabledRacesPanelController: NSObject {
             ),
             display: true
         )
+        // actual 是窗口服务器最终给到的位置，用来确认请求的吸顶位置有没有被系统改动。
+        logState("shown: frame=\(gameFrame) top=\(top) height=\(height) "
+            + "actual=\(overlay.frame) screens=\(NSScreen.screens.map { $0.frame }) "
+            + "races=\(races.map { $0.rawValue })")
         if !overlay.isVisible {
             overlay.orderFront(nil)
         }
