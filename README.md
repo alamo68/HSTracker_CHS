@@ -169,6 +169,8 @@ xcodebuild \
 
 本仓库是基于 HSTracker 的个人增强版，核心记牌和酒馆功能来自 HearthSim/HSTracker，拔线、禁用随从面板和中文界面为本仓库的补充功能。
 
+同步官方新版本时，本仓库改动清单、已知冲突点、编译与发布步骤见 [docs/CHS-MAINTENANCE.md](docs/CHS-MAINTENANCE.md)。
+
 ## License
 
 遵循上游 HSTracker 的许可协议，详见 [LICENSE](LICENSE)。
