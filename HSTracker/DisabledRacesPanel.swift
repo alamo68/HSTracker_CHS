@@ -257,7 +257,7 @@ final class DisabledRacesPanelController: NSObject {
             return
         }
 
-        let races = (game.unavailableRaces ?? []).sorted {
+        let races = disabledRaces(of: game).sorted {
             String.localizedString($0.rawValue, comment: "tribe")
                 < String.localizedString($1.rawValue, comment: "tribe")
         }
@@ -299,6 +299,28 @@ final class DisabledRacesPanelController: NSObject {
         guard lastStateLog != state else { return }
         lastStateLog = state
         logger.info("[DisabledRacesPanel] \(state)")
+    }
+
+    /// 本局被禁用的种族。
+    ///
+    /// 不能直接用 `game.unavailableRaces`：那里的全集是 `Database.battlegroundRaces`，
+    /// 也就是"卡牌数据里出现过的所有种族"，属于历史全集——纳加已经不在酒馆轮换里了，
+    /// 它的卡却还留在数据中，于是被误报成"禁用"。
+    ///
+    /// `BattlegroundsDb` 的 `races` 由 meta period 决定（它自己的注释写着"卡牌数据可能
+    /// 带着不在轮换里的种族，所以由 meta period 决定有哪些"），正是"当前有哪些种族"。
+    /// 远程配置还没到时会回退到旧的算法。
+    private func disabledRaces(of game: Game) -> [Race] {
+        let available = game.availableRaces ?? []
+        guard let first = available.first, first != .invalid else {
+            return []
+        }
+
+        let rotation = BattlegroundsDbSingleton.current.races.filter { $0 != .invalid && $0 != .all }
+        guard !rotation.isEmpty else {
+            return game.unavailableRaces ?? []
+        }
+        return rotation.filter { !available.contains($0) }
     }
 
     /// 炉石客户端进程是否还在。
