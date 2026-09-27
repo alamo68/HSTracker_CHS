@@ -7,12 +7,11 @@ import CoreGraphics
 private let disabledRacesHearthstoneBundleIdentifier = "unity.Blizzard Entertainment.Hearthstone"
 
 private final class TopLeftMergedView: NSView {
-    // 与 Bob's Buddy 面板底部的状态栏同高、同风格（BobsBuddyPanelView.statusBar）：
-    // 文案最小高度 20 + 上下各 5 的内边距 = 30，背景 #141617、圆角 3、
-    // 字号 14、白色文字——只有“一键拔线”用绿色。
-    // Bob's Buddy 画在 RootOverlayView 的 1080 参考画布上按窗口高度等比缩放，
-    // 这里沿用同一套换算，所以任何窗口尺寸下两者高度都一致。
-    static let referenceHeight: CGFloat = 30
+    // 高度直接取 Bob's Buddy 里那一行"胜率"的高度（BobsBuddyPanelView.expandedHeight，
+    // 胜利/平局/失败那一行，和两侧「平均伤害」小格用的是同一个常量），算法也是它那一套：
+    // 面板画在 RootOverlayView 的 1080 参考画布上，按窗口高度等比缩放。
+    // 直接引用常量而不是抄一个数字，上游调整时这里会跟着走。
+    static let referenceHeight: CGFloat = BobsBuddyPanelView.expandedHeight
     static let referenceCanvasHeight: CGFloat = 1080
 
     private static let referenceHorizontalPadding: CGFloat = 5
@@ -28,14 +27,19 @@ private final class TopLeftMergedView: NSView {
         return hearthstoneHeight / referenceCanvasHeight
     }
 
-    /// 面板高度直接取 Bob's Buddy 状态栏在当前缩放下的高度。
+    /// 面板高度 = Bob's Buddy 那一行在当前缩放下的高度。
     static func height(hearthstoneHeight: CGFloat) -> CGFloat {
         max((referenceHeight * scale(hearthstoneHeight: hearthstoneHeight)).rounded(), 1)
     }
 
-    /// 视图按自身高度反推缩放比，保证内容与面板一起缩放。
-    private var scale: CGFloat {
-        max(bounds.height / Self.referenceHeight, 0.1)
+    /// 当前的画布缩放比，由控制者在定位时写入。
+    ///
+    /// 以前是从自身高度反推（bounds.height / referenceHeight），参考高度一变字号就会跟着
+    /// 翻倍；改成显式传入后，字号只跟 1080 参考画布的缩放走，和 Bob's Buddy 一致。
+    var scale: CGFloat = 1 {
+        didSet {
+            needsDisplay = true
+        }
     }
 
     // 状态栏的文案是 .font(.system(size: 14))，两段文字用同一套字体，
@@ -260,9 +264,10 @@ final class DisabledRacesPanelController: NSObject {
         }
         contentView.races = races
 
-        // 与 Bob's Buddy 状态栏同高：用 RootOverlayView 的 1080 参考做等比换算，
-        // 并把内边距、字号一起按同一比例缩放。
+        // 与 Bob's Buddy 那一行胜率同高：用 RootOverlayView 的 1080 参考做等比换算，
+        // 并把内边距、字号一起按同一比例缩放。缩放比显式写给视图，字号不再跟面板高度走。
         let scale = TopLeftMergedView.scale(hearthstoneHeight: gameFrame.height)
+        contentView.scale = scale
         let width = TopLeftMergedView.preferredWidth(
             races: races,
             buttonTitle: contentView.buttonTitle,
