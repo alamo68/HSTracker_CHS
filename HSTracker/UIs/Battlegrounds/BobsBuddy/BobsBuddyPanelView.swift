@@ -26,8 +26,7 @@ struct BobsBuddyPanelView: View {
     @ObservedObject var viewModel: BobsBuddyPanelViewModel
 
     // The storyboards animate both panels between 0 and 55.
-    // 内部的「一键拔线 + 禁用种族」面板要跟这一行等高，所以这个常量对外可见。
-    static let expandedHeight: CGFloat = 55
+    private static let expandedHeight: CGFloat = 55
     // ContainerStyle: MinWidth="60" Margin="5".
     private static let columnMinWidth: CGFloat = 60
     private static let columnPadding: CGFloat = 5
