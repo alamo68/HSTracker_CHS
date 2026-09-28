@@ -30,7 +30,7 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 | 文件 | 类别 | 规模 | 说明 |
 |---|---|---|---|
 | `HSTracker/DisabledRacesPanel.swift` | A | 新增 400 行 | 左上角合并面板（一键拔线 + 禁用种族） |
-| `HSTracker/ClashSkipper.swift` | B | 新增 721 行 | 拔线功能本体 |
+| `HSTracker/ClashSkipper.swift` | B | 新增 473 行 | 拔线功能本体 |
 | `HSTracker/Logging/Game.swift` | C | +60 / −2 | 重连修复，共 4 处 |
 | `HSTracker/AppDelegate.swift` | A+B | +19 | 挂接两个控制器、Dock 菜单、`performClashSkip()` |
 | `HSTracker.xcodeproj/project.pbxproj` | A+B | +8 | 登记两个新文件 |
@@ -63,7 +63,8 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 - 依赖 Clash Verge 的 **TUN 模式** + 全局覆写里的 `find-process-mode: always`，否则 connections 接口拿不到进程信息。
 - 入口有三个：左上角面板按钮、菜单栏「拔线 → 一键拔线」（⇧⌘K）、Dock 右键菜单。
 - 配置项存在 `UserDefaults`：`clash_external_controller`、`clash_secret`。
-- 文件里还留着早期独立悬浮按钮 `ClashSkipFloatingButtonController` / `ClashSkipButtonView`（带拖拽那套）——**目前没有被实例化**，是历史遗留，搬文件时一起带着即可。
+- **早期独立悬浮按钮那段死代码已删除**（2026-09-28）：`ClashSkipFloatingButtonController`、`ClashSkipButtonView`、配套的 `ClashSkipOverlayPanel` 和 `clashHearthstoneBundleIdentifier` 常量，共约 248 行。它们来自合并进 HSTracker 之前的独立 App，从来没有任何地方实例化（xib/storyboard/动态构造都没有），只是同步时被一起搬了过来——现在左上角那个合并面板才是唯一的拔线入口。
+  **同步时注意**：cherry-pick 早期的 CHS 提交（`sync-3.6.10` 那条线的 A+B 提交）会把这 248 行带回来，直接删掉即可，功能不受影响。判断依据可复核：全仓库搜 `ClashSkipFloatingButtonController`，只应出现在 `ClashSkipper.swift` 自己的声明处。
 
 **`HSTracker/AppDelegate.swift`（+19 行，4 处）**：属性声明两个控制器、`applicationDidFinishLaunching` 里实例化并互相绑定、Dock 菜单里 `installDockMenu`、`performClashSkip()`。
 
