@@ -11,7 +11,7 @@
 | 项目 | 值 |
 |---|---|
 | 官方基线 | `3.6.13`（upstream tag） |
-| 本地分支 | `sync-3.6.13`，HEAD `03809cf3` |
+| 本地分支 | `sync-3.6.13`（最新提交见 `git log -1`，别在文档里写死 SHA） |
 | 远端 | `origin` = `alamo68/HSTracker_CHS`（发布用）、`upstream` = `HearthSim/HSTracker` |
 | 与官方的差异 | 12 个文件（含本文件），见下方清单 |
 
