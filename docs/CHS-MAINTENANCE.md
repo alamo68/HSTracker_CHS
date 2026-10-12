@@ -26,7 +26,7 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 ## 3.6.14 同步记录（2026-10-12）
 
 - 基于官方 `3.6.14`（`58643b04`，同步时与 `upstream/master` 相同），按顺序重放 `3.6.13..origin/master` 的 16 个 CHS 提交。
-- 全部自动合并；逐项核对 12 个差异文件，无删除官方文件。
+- 提交全部自动合并；编译时适配上游移除的 `BattlegroundsDbSingleton.instance`，改用 `get(isDuos: game.isBattlegroundsDuosMatch())`，保留按轮换计算禁用种族的逻辑。逐项核对 12 个差异文件，无删除官方文件。
 - 保留上游种族缓存锁、前台显示规则和神明状态重置，保留 CHS 重连恢复与棋盘快照修复。
 - 两个新增控制器仍登记在应用 target；独立悬浮按钮死代码未带回。
 
