@@ -10,8 +10,8 @@
 
 | 项目 | 值 |
 |---|---|
-| 官方基线 | `3.6.13`（upstream tag） |
-| 本地分支 | `sync-3.6.13`（最新提交见 `git log -1`，别在文档里写死 SHA） |
+| 官方基线 | `3.6.14`（upstream tag） |
+| 本地分支 | `sync-3.6.14`（最新提交见 `git log -1`，别在文档里写死 SHA） |
 | 远端 | `origin` = `alamo68/HSTracker_CHS`（发布用）、`upstream` = `HearthSim/HSTracker` |
 | 与官方的差异 | 12 个文件（含本文件），见下方清单 |
 
@@ -23,13 +23,20 @@ git diff --stat <官方tag> HEAD
 git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不删除官方文件
 ```
 
+## 3.6.14 同步记录（2026-10-12）
+
+- 基于官方 `3.6.14`（`58643b04`，同步时与 `upstream/master` 相同），按顺序重放 `3.6.13..origin/master` 的 16 个 CHS 提交。
+- 全部自动合并；逐项核对 12 个差异文件，无删除官方文件。
+- 保留上游种族缓存锁、前台显示规则和神明状态重置，保留 CHS 重连恢复与棋盘快照修复。
+- 两个新增控制器仍登记在应用 target；独立悬浮按钮死代码未带回。
+
 ## 改动清单
 
 分类代号沿用日常沟通里的叫法：**A** 禁用随从面板、**B** 一键拔线、**C** 拔线/重连修复、**D** 中文文本、**E** 其他。
 
 | 文件 | 类别 | 规模 | 说明 |
 |---|---|---|---|
-| `HSTracker/DisabledRacesPanel.swift` | A | 新增 400 行 | 左上角合并面板（一键拔线 + 禁用种族） |
+| `HSTracker/DisabledRacesPanel.swift` | A | 新增 424 行 | 左上角合并面板（一键拔线 + 禁用种族） |
 | `HSTracker/ClashSkipper.swift` | B | 新增 473 行 | 拔线功能本体 |
 | `HSTracker/Logging/Game.swift` | C | +60 / −2 | 重连修复，共 4 处 |
 | `HSTracker/AppDelegate.swift` | A+B | +19 | 挂接两个控制器、Dock 菜单、`performClashSkip()` |
