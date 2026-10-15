@@ -10,8 +10,8 @@
 
 | 项目 | 值 |
 |---|---|
-| 官方基线 | `3.6.14`（upstream tag） |
-| 本地分支 | `sync-3.6.14`（最新提交见 `git log -1`，别在文档里写死 SHA） |
+| 官方基线 | `3.7.0`（upstream tag） |
+| 本地分支 | `sync-3.7.0`（最新提交见 `git log -1`，别在文档里写死 SHA） |
 | 远端 | `origin` = `alamo68/HSTracker_CHS`（发布用）、`upstream` = `HearthSim/HSTracker` |
 | 与官方的差异 | 12 个文件（含本文件），见下方清单 |
 
@@ -22,6 +22,14 @@ git fetch upstream --tags
 git diff --stat <官方tag> HEAD
 git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不删除官方文件
 ```
+
+## 3.7.0 同步记录（2026-10-15）
+
+- 基于官方 `3.7.0`（`8d5ff469`，获取时与 `upstream/master` 相同），按顺序重放上一版 `3.6.14..origin/master` 的 18 个 CHS 提交。
+- 唯一冲突在 `Localizable.xcstrings` 的 `aberration` 条目：保留上游新增德文，同时补回 CHS 简体／繁体中文；不覆盖其他上游翻译。
+- 差异仍限定为维护清单的 12 个文件；不删除官方文件。上游 `Game.swift` 的 `softReset()` 和主线程悬停状态修复完整保留。
+- 保留按单人／双人模式获取轮换数据库、四位数属性自动缩字、面板与 Clash 拔线、重连状态及棋盘快照修复。
+- PF 独立测试工具不属于仓库补丁，未合入应用。
 
 ## 3.6.14 同步记录（2026-10-12）
 
@@ -36,7 +44,7 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 
 | 文件 | 类别 | 规模 | 说明 |
 |---|---|---|---|
-| `HSTracker/DisabledRacesPanel.swift` | A | 新增 424 行 | 左上角合并面板（一键拔线 + 禁用种族） |
+| `HSTracker/DisabledRacesPanel.swift` | A | 新增 425 行 | 左上角合并面板（一键拔线 + 禁用种族） |
 | `HSTracker/ClashSkipper.swift` | B | 新增 473 行 | 拔线功能本体 |
 | `HSTracker/Logging/Game.swift` | C | +60 / −2 | 重连修复，共 4 处 |
 | `HSTracker/AppDelegate.swift` | A+B | +19 | 挂接两个控制器、Dock 菜单、`performClashSkip()` |
