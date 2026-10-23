@@ -29,6 +29,7 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 - 按维护者要求移除四位数属性自动缩字补丁，`BattlegroundsMinionView.swift` 与官方版本保持一致。
 - 保留单人／双人模式种族轮换、面板、拔线、重连状态、棋盘快照和畸变怪中文名。
 - 编译 3.7.1 本地安装版；对比官方差异，不删除上游文件。
+- 修复打包签名方式：主 app ad-hoc 签名，不启用 Hardened Runtime，也不递归重签嵌入运行库；启动校验通过。当前没有 Developer ID 证书，发布包未公证，首次打开提示写入发布说明。
 
 ## 3.7.0 更新记录（2026-10-21）
 
@@ -178,14 +179,18 @@ xcodebuild -project HSTracker.xcodeproj -scheme HSTracker -configuration Release
   CODE_SIGNING_ALLOWED=NO MACOSX_DEPLOYMENT_TARGET=12.0 \
   OTHER_SWIFT_FLAGS='-disable-sandbox -enable-experimental-feature BuiltinModule' build
 
-# 签名（ad-hoc）并打包
-codesign --force --deep --sign - --options runtime \
+# 主程序使用 ad-hoc 签名并打包；不要递归重签嵌入的 .NET / Mono 库
+codesign --force --sign - \
   --entitlements HSTracker/HSTracker.entitlements <HSTracker.app>
+codesign --verify --deep --strict <HSTracker.app>
 ditto -c -k --keepParent <HSTracker.app> HSTracker-CHS-<版本>-macos-universal.zip
+shasum -a 256 HSTracker-CHS-<版本>-macos-universal.zip > SHA256SUMS.txt
 ```
 
 **环境备忘**
 
+- **本地打包签名注意（3.7.1 启动故障修复，2026-10-23）**：HSTracker 内含 Mono/.NET 的 `libcoreclr.dylib` 和 `libSystem.Native.dylib`。不要对整个 `.app` 使用 `codesign --deep --options runtime`：这会递归覆盖这些库的签名，并启用 Hardened Runtime 库校验；本地 ad-hoc 主程序与运行库的 Team ID 不同，启动时 dyld 会报 `mapping process and mapped file (non-platform) have different Team IDs`。本地包只签主 `.app`，不传 `--deep`、不传 `--options runtime`，保留各嵌入库原有签名；然后用 `codesign --verify --deep --strict` 验证。3.7.1 的已验证启动包即按此方式重签。
+- 当前环境没有可用的 Developer ID 身份，ad-hoc 包未做 Apple 公证。由浏览器下载并解压后，macOS 可能因隔离标记拦截首次打开；对自己构建并校验过的包可在 Finder 右键选择“打开”，或在本地安装前对该 `.app` 执行 `xattr -dr com.apple.quarantine <HSTracker.app>`。不要把移除隔离标记用于来源不明的应用。要发布无需此步骤的普通安装包，需用 Developer ID 签名并完成 Apple 公证。
 - `CLANG_MODULE_CACHE_PATH` 必不可少：`Compile CardDefs` 阶段要现场编译 `CardDefsCompiler`，默认的 clang 模块缓存目录在受保护路径下会报 `Operation not permitted`。
 - 构建脚本会联网下载依赖：`libs.hearthsim.net`（HearthMirror、BobsBuddy、HearthDb）和 GitHub 的 `HearthSim/hsdata`（CardDefs.xml 等三份）。**CardDefs 的下载脚本用 `curl -z` 按时间戳判断，换版本时一定要先删掉本地缓存的那三份 xml**，否则会继续沿用旧版本的卡牌数据。
 - **HearthMirror 的新版本 CDN 常常还没发布**：脚本按 `HSTracker/HearthMirror-version.txt` 的 sha 去 `libs.hearthsim.net/hstracker/<sha>/HearthMirror.framework.zip` 下载，官方刚发版时这个 zip 往往是 404（3.6.13 就是），而**官方 release 的应用包里那份 framework 被剥掉了 Headers/Modules，编译用不了**（会报 `Unable to resolve module dependency: 'HearthMirror'`）。处理办法：
@@ -195,7 +200,7 @@ ditto -c -k --keepParent <HSTracker.app> HSTracker-CHS-<版本>-macos-universal.
   4. 把 sha 写进 `downloaded-frameworks/HearthMirror/HearthMirror.sha1`，脚本就会跳过下载。
 
   3.6.13 这次缺的是 `MirrorBattlegroundsMinionPool` / `MirrorBattlegroundsMinionPoolEntry`（属性 `dbfId`、`tier`、`cardType` 是 `NSInteger`，`minionTypes` 是 `NSArray<NSNumber *>`，`banned` 是 `BOOL`）和 `HearthMirror.getBattlegroundsMinionPool`。`downloaded-frameworks/` 已被 gitignore，所以这些只存在本机；等 CDN 补上对应 zip 就能去掉手工声明。
-- `/Applications` 受 macOS「App 管理」保护，`mv`/`rm` 会被拒；`ditto` 是**合并覆盖**，会把上一版残留的文件留下，导致签名失效。做法：`ditto` 覆盖 → 用 `find` 对比两份文件清单移走多余文件 → 重新签名。`~/Applications` 下的副本不受限制。
+- `/Applications` 受 macOS「App 管理」保护，`mv`/`rm` 会被拒；`ditto` 是**合并覆盖**，会把上一版残留的文件留下，导致签名失效。做法：`ditto` 覆盖 → 用 `find` 对比两份文件清单移走多余文件 → 仅重签 app 主包（见上方签名注意）。`~/Applications` 下的副本不受限制。
 
 ## 发布
 
