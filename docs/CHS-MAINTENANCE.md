@@ -10,8 +10,8 @@
 
 | 项目 | 值 |
 |---|---|
-| 官方基线 | `3.7.0` + 上游 `fbc60c02`（2026-10-21 最新 master） |
-| 本地分支 | `sync-3.7.0-20261021`（最新提交见 `git log -1`，别在文档里写死 SHA） |
+| 官方基线 | `3.7.1`（官方 tag） |
+| 本地分支 | `sync-3.7.1-20261023`（最新提交见 `git log -1`，别在文档里写死 SHA） |
 | 远端 | `origin` = `alamo68/HSTracker_CHS`（发布用）、`upstream` = `HearthSim/HSTracker` |
 | 与官方的差异 | 12 个文件（含本文件），见下方清单 |
 
@@ -22,6 +22,13 @@ git fetch upstream --tags
 git diff --stat <官方tag> HEAD
 git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不删除官方文件
 ```
+
+## 3.7.1 同步记录（2026-10-23）
+
+- 基于官方 `3.7.1`，按顺序重放 CHS 面板、Clash 拔线、重连、中文和维护文档补丁；保留上游从 3.7.0 后的所有提交。
+- 按维护者要求移除四位数属性自动缩字补丁，`BattlegroundsMinionView.swift` 与官方版本保持一致。
+- 保留单人／双人模式种族轮换、面板、拔线、重连状态、棋盘快照和畸变怪中文名。
+- 编译 3.7.1 本地安装版；对比官方差异，不删除上游文件。
 
 ## 3.7.0 更新记录（2026-10-21）
 
@@ -34,7 +41,7 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 - 基于官方 `3.7.0`（`8d5ff469`，获取时与 `upstream/master` 相同），按顺序重放上一版 `3.6.14..origin/master` 的 18 个 CHS 提交。
 - 唯一冲突在 `Localizable.xcstrings` 的 `aberration` 条目：保留上游新增德文，同时补回 CHS 简体／繁体中文；不覆盖其他上游翻译。
 - 差异仍限定为维护清单的 12 个文件；不删除官方文件。上游 `Game.swift` 的 `softReset()` 和主线程悬停状态修复完整保留。
-- 保留按单人／双人模式获取轮换数据库、四位数属性自动缩字、面板与 Clash 拔线、重连状态及棋盘快照修复。
+- 保留按单人／双人模式获取轮换数据库、面板与 Clash 拔线、重连状态及棋盘快照修复。四位数属性缩字补丁已在 3.7.1 按维护者要求移除。
 - PF 独立测试工具不属于仓库补丁，未合入应用。
 
 ## 3.6.14 同步记录（2026-10-12）
@@ -56,7 +63,6 @@ git diff --diff-filter=D --name-only <官方tag> HEAD   # 应当为空：绝不�
 | `HSTracker/AppDelegate.swift` | A+B | +19 | 挂接两个控制器、Dock 菜单、`performClashSkip()` |
 | `HSTracker.xcodeproj/project.pbxproj` | A+B | +8 | 登记两个新文件 |
 | `Translations/macOS/Localizable.xcstrings` | D | +13 / −1 | 新种族中文名 |
-| `HSTracker/UIs/Battlegrounds/BattlegroundsMinionView.swift` | E | +32 / −12 | 四位数属性值不再截断 |
 | `README.md` | E | +163 / −29 | 使用文档 |
 | `docs/images/*.jpg` | E | 3 个新文件 | 文档截图 |
 | `docs/CHS-MAINTENANCE.md` | E | 本文件 | 维护笔记 |
@@ -150,7 +156,7 @@ $GIT log --oneline --reverse <上一版基线tag> <上一版CHS分支>
 $GIT cherry-pick -x <sha>      # 顺序照上面列出的来
 # 各提交大致对应：
 #   面板与拔线（A+B）→ 重连修复（C，冲突点见上文）→ 面板尺寸/吸顶 →
-#   四位数不截断（E）→ 畸变怪中文名（D）→ 退出后隐藏 → 后台隐藏 →
+#   畸变怪中文名（D）→ 退出后隐藏 → 后台隐藏 →
 #   越过菜单栏吸顶 → 高度 30 且上下不留白
 
 # 4. 核对差异：应当只有改动清单里那些文件，且没有任何删除
