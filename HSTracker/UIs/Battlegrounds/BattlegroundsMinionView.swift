@@ -61,6 +61,10 @@ struct BattlegroundsMinionDisplay {
 }
 
 class BattlegroundsMinionView: NSView {
+    // The opponent-portrait popup uses Hearthstone-style compact stat labels;
+    // all other callers keep the exact upstream values.
+    var abbreviatesLargeStats = false
+
     var entity: Entity? {
         didSet {
             display = entity.map { BattlegroundsMinionDisplay(entity: $0) }
@@ -190,13 +194,15 @@ class BattlegroundsMinionView: NSView {
         if display.highlightBuffedStats && display.attack > display.originalAttack {
             color = NSColor(red: 0.109, green: 0.89, blue: 0.109, alpha: 1.0)
         }
-        drawText(text: display.attack.description, rect: NSRect(x: 45, y: 90, width: 90, height: 45), color: color)
+        let attackText = abbreviatesLargeStats ? compactStat(display.attack) : display.attack.description
+        drawText(text: attackText, rect: NSRect(x: 45, y: 90, width: 90, height: 45), color: color)
         
         color = NSColor.white
         if display.highlightBuffedStats && display.health > display.originalHealth {
             color = NSColor(red: 0.109, green: 0.89, blue: 0.109, alpha: 1.0)
         }
-        drawText(text: display.health.description, rect: NSRect(x: 165, y: 90, width: 90, height: 45), color: color)
+        let healthText = abbreviatesLargeStats ? compactStat(display.health) : display.health.description
+        drawText(text: healthText, rect: NSRect(x: 165, y: 90, width: 90, height: 45), color: color)
         
         return true
         })
@@ -204,8 +210,38 @@ class BattlegroundsMinionView: NSView {
         image.draw(in: visibleRect  )
     }
     
+    private func compactStat(_ value: Int) -> String {
+        guard value >= 1_000 else { return value.description }
+
+        let suffixes = ["K", "M", "B"]
+        var suffixIndex = 0
+        var divisor = 1_000.0
+        var scaledValue = Double(value) / divisor
+
+        while scaledValue >= 1_000, suffixIndex < suffixes.count - 1 {
+            suffixIndex += 1
+            divisor *= 1_000
+            scaledValue = Double(value) / divisor
+        }
+
+        // Round to one decimal like the Hearthstone compact stat label, then
+        // promote at a unit boundary so 999,999 doesn't render as 1000K.
+        var roundedValue = (scaledValue * 10).rounded() / 10
+        if roundedValue >= 1_000, suffixIndex < suffixes.count - 1 {
+            suffixIndex += 1
+            roundedValue /= 1_000
+        }
+
+        let number = roundedValue.rounded(.towardZero) == roundedValue
+            ? String(Int(roundedValue))
+            : String(format: "%.1f", locale: Locale(identifier: "en_US_POSIX"), roundedValue)
+        return number + suffixes[suffixIndex]
+    }
+
     func drawText(text: String, rect: NSRect, color: NSColor) {
-        if let font = NSFont(name: "ChunkFive", size: 45) {
+        let fontSize: CGFloat = 45
+
+        if let font = NSFont(name: "ChunkFive", size: fontSize) {
             var attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: color,

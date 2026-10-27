@@ -99,7 +99,7 @@ struct BattlegroundsOpponentInfoView: View {
             // HorizontalAlignment="Center".
             HStack(spacing: -Self.minionOverlap) {
                 ForEach(Array(viewModel.minions.prefix(7).enumerated()), id: \.offset) { _, minion in
-                    BattlegroundsMinionRepresentable(entity: minion)
+                    BattlegroundsMinionRepresentable(entity: minion, abbreviatesLargeStats: true)
                         .frame(width: Self.minionWidth, height: Self.minionHeight)
                         .padding(.vertical, Self.minionVerticalPadding)
                 }

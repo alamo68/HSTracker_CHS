@@ -20,13 +20,16 @@ import SwiftUI
 // visibly squashed.
 struct BattlegroundsMinionRepresentable: NSViewRepresentable {
     let display: BattlegroundsMinionDisplay
+    var abbreviatesLargeStats = false
 
-    init(entity: Entity) {
+    init(entity: Entity, abbreviatesLargeStats: Bool = false) {
         display = BattlegroundsMinionDisplay(entity: entity)
+        self.abbreviatesLargeStats = abbreviatesLargeStats
     }
 
-    init(display: BattlegroundsMinionDisplay) {
+    init(display: BattlegroundsMinionDisplay, abbreviatesLargeStats: Bool = false) {
         self.display = display
+        self.abbreviatesLargeStats = abbreviatesLargeStats
     }
 
     // The 300x350 composite's aspect, as the height that goes with a given
@@ -38,11 +41,13 @@ struct BattlegroundsMinionRepresentable: NSViewRepresentable {
     func makeNSView(context: Context) -> BattlegroundsMinionView {
         let view = BattlegroundsMinionView()
         view.display = display
+        view.abbreviatesLargeStats = abbreviatesLargeStats
         return view
     }
 
     func updateNSView(_ nsView: BattlegroundsMinionView, context: Context) {
         nsView.display = display
+        nsView.abbreviatesLargeStats = abbreviatesLargeStats
         nsView.needsDisplay = true
     }
 }
